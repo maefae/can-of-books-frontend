@@ -1,7 +1,7 @@
 import { Component } from "react";
 import Container from "react-bootstrap/Container";
-import image from "./profile.jpg";
-import image2 from "./100x100.jpg";
+import image from "./assets/profile.jpg";
+import image2 from "./assets/100x100.jpg";
 
 class Profile extends Component {
   render() {
