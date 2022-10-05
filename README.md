@@ -67,3 +67,13 @@ open communication
 
 - How will you approach each other and the challenge of building an application knowing that it is impossible for two people to be at the exact same place in understanding and skill level?
 Research outside of class, TA help, and Adam on speed dial. Asks classmates for confirmation in task.
+
+Name of feature: ________________________________
+
+Estimate of time needed to complete: _____
+
+Start time: _____
+
+Finish time: _____
+
+Actual time needed to complete: _____
