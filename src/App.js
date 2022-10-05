@@ -6,12 +6,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import About from "./About";
 
+
 class App extends React.Component {
   render() {
     return (
       <>
         <Router>
           <Header />
+          <BestBooks />
           <Routes>
             <Route exact path="/" element={<BestBooks />}></Route>
             <Route path="/About" element={<About />} />

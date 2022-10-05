@@ -3,14 +3,36 @@ import axios from "axios";
 import { Carousel } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container } from "react-bootstrap";
+import BookFormModal from "./BookFormModal";
 
 class BestBooks extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       books: [],
+      showModal: false,
     };
   }
+
+  // Make the post request to the server
+  handleBooksCreate = async (booksInfo) => {
+    // postBook
+    console.log("booksInfo is:", booksInfo);
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_SERVER}/books`,
+        booksInfo
+      );
+      // Don't forget .data!
+      const createdBooks = res.data;
+      // update state and render the createdBOok
+      this.setState({
+        books: [...this.state.books, createdBooks],
+      });
+    } catch (error) {
+      console.log("we have an error: ", error.response);
+    }
+  };
 
   getBooks = async () => {
     try {
@@ -25,6 +47,34 @@ class BestBooks extends React.Component {
     }
   };
 
+  toggleModal = () => {
+    this.setState({
+      showModal: !this.state.showModal,
+    });
+  };
+
+  deleteBook = async (id) => {
+    try {
+        let deleteConfirmation = window.confirm(`Are You Sure You want to Delete this?`);
+        if (deleteConfirmation) {
+          const response = await axios.delete(
+            `${process.env.REACT_APP_SERVER}/books/${id}`
+          );
+          console.log("The response.status is:", response.status);
+          // filter it out from state
+          const filteredBooks = this.state.books.filter((book) => {
+            return book._id !== id;
+          });
+          this.setState({
+            books: filteredBooks,
+          });
+        }
+        } catch (error) {
+          console.log("we have an error: ", error.response);
+        }
+  };
+
+
   // React Lifecycle function that will run this block of code as soon as the component is rendered to the DOM tree... net effect: it will call this.getCats() right on site load.
   componentDidMount() {
     this.getBooks();
@@ -34,13 +84,14 @@ class BestBooks extends React.Component {
     return (
       <>
         <h2>My Essential Lifelong Learning &amp; Formation Shelf</h2>
-
+        <BookFormModal handleBooksCreate={this.handleBooksCreate}
+          showModal={this.state.showModal} hideModal={this.toggleModal} />
         {this.state.books.length ? (
           <Container>
             <Carousel className="h-50 rounded-bottom mb-5 bg-dark rounded">
-              {this.state.books.map((book) => {
+              {this.state.books.map((book, index) => {
                 return (
-                  <Carousel.Item>
+                  <Carousel.Item key={index}>
                     <>
                       <div className="pb-5 mb-5">
                         <img
@@ -60,6 +111,9 @@ class BestBooks extends React.Component {
                           <p>{book.description}</p>
                           <p>{book.status}</p>
                         </div>
+                        <button onClick={() => {this.deleteBook(book._id)}} >
+                          Delete this Entry?
+                        </button>
                       </>
                     </Carousel.Caption>
                   </Carousel.Item>
@@ -70,6 +124,7 @@ class BestBooks extends React.Component {
         ) : (
           <p>Book collection is empty.</p>
         )}
+        <button className="" onClick={this.toggleModal}>Add book</button>
       </>
     );
   }
