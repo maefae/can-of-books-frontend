@@ -3,14 +3,36 @@ import axios from "axios";
 import { Carousel } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container } from "react-bootstrap";
+import Form from "./BookFormModal";
 
 class BestBooks extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       books: [],
+      showModal: false,
     };
   }
+
+  // Make the post request to the server
+  handleBooksCreate = async (booksInfo) => {
+    // postBook
+    console.log("booksInfo is:", booksInfo);
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_SERVER}/books`,
+        booksInfo
+      );
+      // Don't forget .data!
+      const createdBooks = res.data;
+      // update state and render the createdBOok
+      this.setState({
+        books: [...this.state.books, createdBooks],
+      });
+    } catch (error) {
+      console.log("we have an error: ", error.response);
+    }
+  };
 
   getBooks = async () => {
     try {
@@ -25,6 +47,12 @@ class BestBooks extends React.Component {
     }
   };
 
+  toggleModal = () => {
+    this.setState({
+      showModal: !this.state.showModal,
+    });
+  };
+
   // React Lifecycle function that will run this block of code as soon as the component is rendered to the DOM tree... net effect: it will call this.getCats() right on site load.
   componentDidMount() {
     this.getBooks();
@@ -34,7 +62,7 @@ class BestBooks extends React.Component {
     return (
       <>
         <h2>My Essential Lifelong Learning &amp; Formation Shelf</h2>
-
+        <Form bookCreateProp={this.handleBooksCreate} daddy="chill" />
         {this.state.books.length ? (
           <Container>
             <Carousel className="h-50 rounded-bottom mb-5 bg-dark rounded">
