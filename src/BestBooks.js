@@ -11,7 +11,9 @@ class BestBooks extends React.Component {
     super(props);
     this.state = {
       books: [],
-      showModal: false,
+      showAddModal: false,
+      showUpdateModal: false,
+      book: [],
     };
   }
 
@@ -48,9 +50,16 @@ class BestBooks extends React.Component {
     }
   };
 
-  toggleModal = () => {
+  toggleAddModal = () => {
     this.setState({
-      showModal: !this.state.showModal,
+      showAddModal: !this.state.showAddModal,
+    });
+  };
+
+  toggleUpdateModal = (book) => {
+    this.setState({
+      currentBook: book,
+      showUpdateModal: !this.state.showUpdateModal,
     });
   };
 
@@ -82,8 +91,8 @@ class BestBooks extends React.Component {
   updateBook = async (updatedBook) => {
     try {
       // make url using the `_id` property of the `updatedBook` argument
-      console.log(updatedBook);
-      let url = `${process.env.REACT_APP_SERVER}/books/${updatedBook._id}`;
+      // console.log(updatedBook);
+      let url = `${process.env.REACT_APP_SERVER}/books/${updatedBook}`;
 
       // get the updatedBook from the database
       let updatedBookFromDB = await axios.put(url, updatedBook);
@@ -94,7 +103,7 @@ class BestBooks extends React.Component {
         // if the `._id` matches the book we want to update:
         // replace that element with the updatedBookFromDB book object
 
-        return existingBook._id === updatedBook._id
+        return existingBook._id === this.currentBook._id
           ? updatedBookFromDB.data
           : existingBook;
       });
@@ -107,28 +116,6 @@ class BestBooks extends React.Component {
       console.log("Problem updating book...: ", e.message);
     }
   };
-  handleUpdate = (e) => {
-    e.preventDefault();
-
-    let bookToUpdate = {
-      title: e.target.title.value || this.state.book.title,
-      description: e.target.description.value || this.state.book.description,
-      status: e.target.status.value || this.state.book.status,
-
-      // pass in _id and __v of book
-      _id: this.state.book._id,
-
-      // two underscores
-      __v: this.state.book.__v,
-    };
-
-    // log to see the book we are to update
-    console.log("bookToUpdate: ", bookToUpdate);
-    this.updateBook(bookToUpdate);
-  };
-  // update books method end!!!!!
-
-  // React Lifecycle function that will run this block of code as soon as the component is rendered to the DOM tree... net effect: it will call this.getCats() right on site load.
   componentDidMount() {
     this.getBooks();
   }
@@ -139,9 +126,15 @@ class BestBooks extends React.Component {
         <h2>My Essential Lifelong Learning &amp; Formation Shelf</h2>
         <BookFormModal
           handleBooksCreate={this.handleBooksCreate}
-          showModal={this.state.showModal}
-          hideModal={this.toggleModal}
-          updatebook={this.updatedBook}
+          showModal={this.state.showAddModal}
+          hideModal={this.toggleAddModal}
+          handleUpdate={this.handleUpdate}
+        />
+        <BookUpdateFormModal
+          show={this.state.showUpdateModal}
+          onHide={this.toggleUpdateModal}
+          updateBook={this.updateBook}
+          currentBook={this.currentBook}
         />
         {this.state.books.length ? (
           <Container>
@@ -168,19 +161,13 @@ class BestBooks extends React.Component {
                           <p>{book.description}</p>
                           <p>{book.status}</p>
                         </div>
-                        <BookUpdateFormModal />
                         <button
-                          onClick={() => {
-                            this.deleteBook(book._id);
-                          }}
-                        >
+                          onClick={() => {this.deleteBook(book._id)}
+                          }>
                           Delete this Entry?
                         </button>
-
                         <button
-                          onClick={() => {
-                            this.updateBook(book._id);
-                          }}
+                          onClick={() => this.toggleUpdateModal(book)}
                         >
                           Update Book
                         </button>
@@ -193,8 +180,9 @@ class BestBooks extends React.Component {
           </Container>
         ) : (
           <p>Book collection is empty.</p>
-        )}
-        <button className="" onClick={this.toggleModal}>
+        )
+        }
+        <button className="" onClick={this.toggleAddModal}>
           Add book
         </button>
       </>
