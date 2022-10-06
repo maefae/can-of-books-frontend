@@ -4,13 +4,16 @@ import { Carousel } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container } from "react-bootstrap";
 import BookFormModal from "./BookFormModal";
+import BookUpdateFormModal from "./BookUpdateFormModal";
 
 class BestBooks extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       books: [],
-      showModal: false,
+      showAddModal: false,
+      showUpdateModal: false,
+      book: [],
     };
   }
 
@@ -47,35 +50,72 @@ class BestBooks extends React.Component {
     }
   };
 
-  toggleModal = () => {
+  toggleAddModal = () => {
     this.setState({
-      showModal: !this.state.showModal,
+      showAddModal: !this.state.showAddModal,
+    });
+  };
+
+  toggleUpdateModal = (book) => {
+    this.setState({
+      currentBook: book,
+      showUpdateModal: !this.state.showUpdateModal,
     });
   };
 
   deleteBook = async (id) => {
     try {
-        let deleteConfirmation = window.confirm(`Are You Sure You want to Delete this?`);
-        if (deleteConfirmation) {
-          const response = await axios.delete(
-            `${process.env.REACT_APP_SERVER}/books/${id}`
-          );
-          console.log("The response.status is:", response.status);
-          // filter it out from state
-          const filteredBooks = this.state.books.filter((book) => {
-            return book._id !== id;
-          });
-          this.setState({
-            books: filteredBooks,
-          });
-        }
-        } catch (error) {
-          console.log("we have an error: ", error.response);
-        }
+      let deleteConfirmation = window.confirm(
+        `Are You Sure You want to Delete this?`
+      );
+      if (deleteConfirmation) {
+        const response = await axios.delete(
+          `${process.env.REACT_APP_SERVER}/books/${id}`
+        );
+        console.log("The response.status is:", response.status);
+        // filter it out from state
+        const filteredBooks = this.state.books.filter((book) => {
+          return book._id !== id;
+        });
+        this.setState({
+          books: filteredBooks,
+        });
+      }
+    } catch (error) {
+      console.log("we have an error: ", error.response);
+    }
   };
 
+  // updating books method beginning!!!!
 
-  // React Lifecycle function that will run this block of code as soon as the component is rendered to the DOM tree... net effect: it will call this.getCats() right on site load.
+  updateBook = async (updatedBook) => {
+    try {
+      // make url using the `_id` property of the `updatedBook` argument
+      // console.log(updatedBook);
+      let url = `${process.env.REACT_APP_SERVER}/books/${updatedBook}`;
+
+      // get the updatedBook from the database
+      let updatedBookFromDB = await axios.put(url, updatedBook);
+
+      // update state, so that it can rerender with updated books info
+
+      let updatedBookArray = this.state.books.map((existingBook) => {
+        // if the `._id` matches the book we want to update:
+        // replace that element with the updatedBookFromDB book object
+
+        return existingBook._id === this.currentBook._id
+          ? updatedBookFromDB.data
+          : existingBook;
+      });
+
+      this.setState({
+        books: updatedBookArray,
+        showUpdateModal: false,
+      });
+    } catch (e) {
+      console.log("Problem updating book...: ", e.message);
+    }
+  };
   componentDidMount() {
     this.getBooks();
   }
@@ -84,8 +124,18 @@ class BestBooks extends React.Component {
     return (
       <>
         <h2>My Essential Lifelong Learning &amp; Formation Shelf</h2>
-        <BookFormModal handleBooksCreate={this.handleBooksCreate}
-          showModal={this.state.showModal} hideModal={this.toggleModal} />
+        <BookFormModal
+          handleBooksCreate={this.handleBooksCreate}
+          showModal={this.state.showAddModal}
+          hideModal={this.toggleAddModal}
+          handleUpdate={this.handleUpdate}
+        />
+        <BookUpdateFormModal
+          show={this.state.showUpdateModal}
+          onHide={this.toggleUpdateModal}
+          updateBook={this.updateBook}
+          currentBook={this.currentBook}
+        />
         {this.state.books.length ? (
           <Container>
             <Carousel className="h-50 rounded-bottom mb-5 bg-dark rounded">
@@ -111,8 +161,15 @@ class BestBooks extends React.Component {
                           <p>{book.description}</p>
                           <p>{book.status}</p>
                         </div>
-                        <button onClick={() => {this.deleteBook(book._id)}} >
+                        <button
+                          onClick={() => {this.deleteBook(book._id)}
+                          }>
                           Delete this Entry?
+                        </button>
+                        <button
+                          onClick={() => this.toggleUpdateModal(book)}
+                        >
+                          Update Book
                         </button>
                       </>
                     </Carousel.Caption>
@@ -123,8 +180,11 @@ class BestBooks extends React.Component {
           </Container>
         ) : (
           <p>Book collection is empty.</p>
-        )}
-        <button className="" onClick={this.toggleModal}>Add book</button>
+        )
+        }
+        <button className="" onClick={this.toggleAddModal}>
+          Add book
+        </button>
       </>
     );
   }
