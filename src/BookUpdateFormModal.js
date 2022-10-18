@@ -16,25 +16,25 @@ class BookUpdateFormModal extends React.Component {
     // this.props.updateBook(this.handleUpdate);
   };
 
-  // handleUpdate = (e) => {
-  //   e.preventDefault();
+  handleUpdate = (e) => {
+    e.preventDefault();
 
-  //   let bookToUpdate = {
-  //     title: e.target.title.value || this.state.book.title,
-  //     description: e.target.description.value || this.state.book.description,
-  //     status: e.target.status.value || this.state.book.status,
+    let bookToUpdate = {
+      title: e.target.title.value || this.state.book.title,
+      description: e.target.description.value || this.state.book.description,
+      status: e.target.status.value || this.state.book.status,
 
-  //     // pass in _id and __v of book
-  //     _id: this.state.book._id,
+      // pass in _id and __v of book
+      _id: this.state.book._id,
 
-  //     // two underscores
-  //     __v: this.state.book.__v,
-  //   };
+      // two underscores
+      __v: this.state.book.__v,
+    };
 
-  //   // log to see the book we are to update
-  //   console.log("bookToUpdate: ", bookToUpdate);
-  //   this.props.updateBook(bookToUpdate);
-  // };
+    // log to see the book we are to update
+    console.log("bookToUpdate: ", bookToUpdate);
+    this.props.updateBook(bookToUpdate);
+  };
 
 
   render() {
